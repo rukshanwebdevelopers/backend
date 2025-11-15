@@ -2,25 +2,21 @@ from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.response import Response
 
-from authentication.models import User
 from core.permissions.base import ROLE, allow_permission
 from core.views.base import BaseViewSet
+from user.models import Student
 from user.serializers import StudentListSerializer, StudentSerializer
 
 
 class StudentViewSet(BaseViewSet):
-    model = User
+    model = Student
     serializer_class = StudentListSerializer
 
-    search_fields = ["username", "email"]
+    search_fields = ["student_number"]
 
     def get_queryset(self):
         return (
-            self.filter_queryset(
-                super()
-                .get_queryset()
-                .filter(role=ROLE.STUDENT.value)
-            )
+            self.filter_queryset(super().get_queryset())
         )
 
     def list(self, request, *args, **kwargs):
