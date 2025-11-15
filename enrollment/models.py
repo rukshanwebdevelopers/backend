@@ -1,8 +1,8 @@
 from django.db import models
 
-from authentication.models import User
 from core.models.base import BaseModel
 from course.models import Course
+from user.models import Student
 
 
 # Create your models here.
@@ -12,13 +12,13 @@ class EnrollmentStatusType(models.TextChoices):
 
 
 class Enrollment(BaseModel):
-    status = models.CharField(max_length=20, choices=EnrollmentStatusType.choices, )
+    status = models.CharField(max_length=20, choices=EnrollmentStatusType.choices)
     last_payment_month = models.PositiveIntegerField(default=0)
     last_payment_year = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=False)
 
     student = models.ForeignKey(
-        User,
+        Student,
         related_name="enrollments",
         on_delete=models.CASCADE
     )
