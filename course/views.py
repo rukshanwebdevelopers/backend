@@ -1,7 +1,10 @@
+from rest_framework import status
+from rest_framework.response import Response
+
 from core.permissions.base import allow_permission, ROLE
 from core.views.base import BaseViewSet
 from course.models import Course
-from course.serializers import CourseListSerializer
+from course.serializers import CourseListSerializer, CourseSerializer
 
 
 # Create your views here.
@@ -21,7 +24,13 @@ class CourseViewSet(BaseViewSet):
 
     @allow_permission([ROLE.ADMIN])
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        serializer = CourseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        course = serializer.save()
+
+        output = CourseListSerializer(course, context={"request": request}).data
+        return Response(output, status=status.HTTP_201_CREATED)
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
