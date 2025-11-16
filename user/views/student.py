@@ -1,11 +1,10 @@
-from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.response import Response
 
 from core.permissions.base import ROLE, allow_permission
 from core.views.base import BaseViewSet
 from user.models import Student
-from user.serializers import StudentListSerializer, StudentSerializer
+from user.serializers import StudentListSerializer, StudentCreateSerializer, StudentUpdateSerializer
 
 
 class StudentViewSet(BaseViewSet):
@@ -22,22 +21,28 @@ class StudentViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    def create(self, request):
-        try:
-            input_serializer = StudentSerializer(data=request.data)
-            input_serializer.is_valid(raise_exception=True)
-            instance = input_serializer.save()
+    def create(self, request, *args, **kwargs):
+        serializer = StudentCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-            # Use the output serializer (self.serializer_class)
-            output_serializer = self.serializer_class(instance, context={"request": request})
-            return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+        student = serializer.save()
 
-        except IntegrityError as e:
-            if "already exists" in str(e):
-                return Response(
-                    {"slug": "The student with the username already exists"},
-                    status=status.HTTP_409_CONFLICT,
-                )
+        output = StudentListSerializer(student, context={"request": request}).data
+        return Response(output, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        student = Student.objects.get(pk=kwargs["pk"])
+
+        serializer = StudentUpdateSerializer(
+            student,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        student = serializer.save()
+
+        output = StudentListSerializer(student, context={"request": request}).data
+        return Response(output, status=status.HTTP_200_OK)
 
     @allow_permission([ROLE.ADMIN])
     def destroy(self, request, *args, **kwargs):

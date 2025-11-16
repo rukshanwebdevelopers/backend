@@ -52,12 +52,12 @@ urlpatterns = [
         name="user",
     ),
     path(
-        "academicYear/",
+        "academicYears/",
         AcademicYearViewSet.as_view({"get": "list", "post": "create"}),
         name="academicYear",
     ),
     path(
-        "academicYear/<uuid:pk>/",
+        "academicYears/<uuid:pk>/",
         AcademicYearViewSet.as_view({
             "get": "retrieve",
             "put": "update",
