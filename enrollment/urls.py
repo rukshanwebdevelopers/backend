@@ -14,7 +14,7 @@ urlpatterns = [
         name="enrollment",
     ),
     path(
-        "enrollments/<str:slug>/",
+        "enrollments/<uuid:pk>/",
         EnrollmentViewSet.as_view({
             "get": "retrieve",
             "put": "update",
