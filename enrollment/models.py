@@ -36,8 +36,8 @@ class Enrollment(BaseModel):
 
 
 class EnrollmentPayment(BaseModel):
-    payment_month = models.PositiveIntegerField(default=0)
-    payment_year = models.PositiveIntegerField(default=0)
+    payment_month = models.PositiveIntegerField()
+    payment_year = models.PositiveIntegerField()
     amount = models.FloatField()
     payment_date = models.DateField()
 

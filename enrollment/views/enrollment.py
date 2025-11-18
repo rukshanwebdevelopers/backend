@@ -12,7 +12,7 @@ class EnrollmentViewSet(BaseViewSet):
     model = Enrollment
     serializer_class = EnrollmentListSerializer
 
-    search_fields = ["status"]
+    search_fields = ["course__name", "student__user__first_name", "student__user__last_name"]
     filterset_fields = []
 
     def get_queryset(self):
