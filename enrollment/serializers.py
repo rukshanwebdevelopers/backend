@@ -15,6 +15,7 @@ class EnrollmentSerializer(BaseSerializer):
 
     def create(self, validated_data):
         validated_data['status'] = EnrollmentStatusType.LOCKED
+        validated_data['is_active'] = True
         return super().create(validated_data)
 
 
