@@ -67,7 +67,7 @@ class EnrollmentPaymentCreateSerializer(BaseSerializer):
             payment_year=attrs["payment_year"],
         ).exists():
             raise serializers.ValidationError(
-                {"enrollment_payment": "Already paid for this course"}
+                {"payment_month": "Already paid for this course"}
             )
 
         return attrs
