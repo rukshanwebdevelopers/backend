@@ -1,9 +1,8 @@
-from django.db import IntegrityError, transaction
-from rest_framework import status
+from django.db import transaction
 from rest_framework.response import Response
 
 from core.views.base import BaseViewSet
-from enrollment.models import Enrollment, EnrollmentPayment, EnrollmentStatusType
+from enrollment.models import EnrollmentPayment, EnrollmentStatusType
 from enrollment.serializers import EnrollmentPaymentListSerializer, EnrollmentPaymentCreateSerializer
 
 
@@ -35,7 +34,6 @@ class EnrollmentPaymentViewSet(BaseViewSet):
             enrollment.save()
 
             return Response(EnrollmentPaymentListSerializer(enrollment_payment).data, status=201)
-
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
