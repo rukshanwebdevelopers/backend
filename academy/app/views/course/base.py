@@ -1,5 +1,8 @@
+from rest_framework import status
+from rest_framework.response import Response
+
 from academy.app.permissions.base import allow_permission, ROLE
-from academy.app.serializers.course import CourseListSerializer
+from academy.app.serializers.course import CourseListSerializer, CourseSerializer
 from academy.app.views.base import BaseViewSet
 from academy.db.models import Course
 
@@ -27,7 +30,11 @@ class CourseViewSet(BaseViewSet):
 
     @allow_permission([ROLE.ADMIN])
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        serializer = CourseSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            data = serializer.data
+            return Response(data, status=status.HTTP_201_CREATED)
 
     @allow_permission([ROLE.ADMIN])
     def update(self, request, *args, **kwargs):
