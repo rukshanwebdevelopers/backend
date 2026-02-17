@@ -20,9 +20,6 @@ class CourseListSerializer(BaseSerializer):
 
 
 class CourseSerializer(BaseSerializer):
-    subject = SubjectListSerializer()
-    teacher = TeacherListSerializer()
-
     class Meta:
         model = Course
         fields = '__all__'
