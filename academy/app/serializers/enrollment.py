@@ -21,6 +21,19 @@ class EnrollmentSerializer(BaseSerializer):
         validated_data['is_active'] = True
         return super().create(validated_data)
 
+    def update(self, instance, validated_data):
+        # Keep only 'is_active' if it exists
+        is_active = validated_data.get('is_active')
+
+        # Clear all incoming data
+        validated_data.clear()
+
+        # Re-assign only is_active
+        if is_active is not None:
+            validated_data['is_active'] = is_active
+
+        return super().update(instance, validated_data)
+
 
 class EnrollmentListSerializer(BaseSerializer):
     student = StudentListSerializer()
