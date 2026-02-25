@@ -1,4 +1,5 @@
 from django.db import IntegrityError
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -114,3 +115,34 @@ class EnrollmentViewSet(BaseViewSet):
     @allow_permission([ROLE.ADMIN])
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+
+
+class EnrollmentPendingPaymentViewSet(BaseViewSet):
+    model = Enrollment
+    serializer_class = EnrollmentListSerializer
+
+    search_fields = []
+    filterset_fields = []
+
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(is_active=True)
+
+        month = self.request.query_params.get("last_payment_month")
+        year = self.request.query_params.get("last_payment_year")
+
+        if month and year:
+            month = int(month)
+            year = int(year)
+
+            queryset = queryset.filter(
+                Q(last_payment_year__lt=year) |
+                Q(
+                    last_payment_year=year,
+                    last_payment_month__lt=month
+                )
+            )
+
+        return self.filter_queryset(queryset)
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
