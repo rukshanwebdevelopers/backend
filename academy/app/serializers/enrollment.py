@@ -64,6 +64,7 @@ class EnrollmentWithPaymentMonthsSerializer(BaseSerializer):
             'course_offering',
             'student',
             'months',
+            'is_active',
         ]
 
     def get_months(self, enrollment):
