@@ -34,6 +34,7 @@ class StudentCreateSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True, required=False)
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
+    parent_guardian_phone = serializers.CharField(write_only=True)
 
     class Meta:
         model = Student
@@ -81,6 +82,7 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(write_only=True, required=False)
     username = serializers.CharField(write_only=True, required=False)
     email = serializers.EmailField(write_only=True, required=False)
+    parent_guardian_phone = serializers.CharField(write_only=True)
     # password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
