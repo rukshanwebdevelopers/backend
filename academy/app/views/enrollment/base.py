@@ -7,8 +7,7 @@ from academy.app.permissions.base import allow_permission, ROLE
 from academy.app.serializers.enrollment import EnrollmentListSerializer, EnrollmentWithPaymentMonthsSerializer, \
     EnrollmentSerializer
 from academy.app.views.base import BaseViewSet
-from academy.db.models import Enrollment, EnrollmentPayment, Student, CourseOffering
-from academy.db.models.enrollment import EnrollmentStatusType
+from academy.db.models import Enrollment, Student, CourseOffering
 
 
 # Create your views here.
@@ -86,28 +85,18 @@ class EnrollmentViewSet(BaseViewSet):
                 )
 
     def update(self, request, *args, **kwargs):
-        # Get enrollment instance being updated
-        enrollment = self.get_object()
-
-        # Get the latest payment for this enrollment
-        latest_payment = (
-            EnrollmentPayment.objects
-            .filter(enrollment=enrollment)
-            .order_by("-payment_year", "-payment_month")
-            .first()
+        enrollment = Enrollment.objects.get(pk=kwargs["pk"])
+        serializer = EnrollmentSerializer(
+            enrollment,
+            data=request.data,
+            partial=True,
         )
 
-        # If a payment exists, update the enrollment fields
-        if latest_payment:
-            enrollment.last_payment_month = latest_payment.payment_month
-            enrollment.last_payment_year = latest_payment.payment_year
+        serializer.is_valid(raise_exception=True)
+        enrollment = serializer.save()
 
-            # Business rule: If paid → set ACTIVE
-            enrollment.status = EnrollmentStatusType.ACTIVE
-            enrollment.save()
-
-        data = EnrollmentListSerializer(enrollment).data
-        return Response(data, status.HTTP_200_OK)
+        output = EnrollmentListSerializer(enrollment, context={"request": request}).data
+        return Response(output, status=status.HTTP_200_OK)
 
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
