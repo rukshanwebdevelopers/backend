@@ -1,8 +1,9 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from academy.app.permissions.base import ROLE
 from academy.app.serializers.user import UserLiteSerializer
-from academy.db.models import Teacher, User
+from academy.db.models import Teacher, User, Notification, UserNotification
 
 
 class TeacherListSerializer(serializers.ModelSerializer):
@@ -39,29 +40,42 @@ class TeacherCreateSerializer(serializers.ModelSerializer):
 
     # --- CREATE ---
     def create(self, validated_data):
-        # Extract fields NOT in Student model
-        first_name = validated_data.pop("first_name")
-        last_name = validated_data.pop("last_name")
-        username = validated_data.pop("username")
-        email = validated_data.pop("email")
-        password = validated_data.pop("password")
-        mobile_number = validated_data.pop("mobile_number")
+        with transaction.atomic():
+            # Extract fields NOT in Student model
+            first_name = validated_data.pop("first_name")
+            last_name = validated_data.pop("last_name")
+            username = validated_data.pop("username")
+            email = validated_data.pop("email")
+            password = validated_data.pop("password")
+            mobile_number = validated_data.pop("mobile_number")
 
-        # Create user
-        user = User.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            username=username,
-            email=email,
-            role=ROLE.TEACHER.value,
-            mobile_number=mobile_number,
-        )
-        user.set_password(password)
-        user.save()
+            # Create user
+            user = User.objects.create(
+                first_name=first_name,
+                last_name=last_name,
+                username=username,
+                email=email,
+                role=ROLE.TEACHER.value,
+                mobile_number=mobile_number,
+            )
+            user.set_password(password)
+            user.save()
 
-        # Now validated_data ONLY contains Student model fields
-        teacher = Teacher.objects.create(user=user, **validated_data)
-        return teacher
+            notification = Notification.objects.create(
+                title="Welcome to Beyond Health",
+                message=f"We're so glad you're here!",
+                type="USER_WELCOME",
+                priority="low",
+            )
+
+            UserNotification.objects.create(
+                notification=notification,
+                user=user,
+            )
+
+            # Now validated_data ONLY contains Student model fields
+            teacher = Teacher.objects.create(user=user, **validated_data)
+            return teacher
 
 
 class TeacherUpdateSerializer(serializers.ModelSerializer):
