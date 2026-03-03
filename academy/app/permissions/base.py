@@ -17,6 +17,7 @@ class ROLE(Enum):
 ROLE_PERMISSIONS = {
     ROLE.ADMIN: ["super_admin"],
     ROLE.TEACHER: ["teacher"],
+    ROLE.COORDINATOR: ["coordinator"],
     ROLE.STUDENT: ["student"],
     ROLE.GUEST: ["guest"],
 }
