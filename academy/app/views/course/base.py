@@ -19,7 +19,7 @@ class CourseViewSet(BaseViewSet):
 
     def get_queryset(self):
         return (
-            self.filter_queryset(super().get_queryset())
+            self.filter_queryset(super().get_queryset().select_related('subject'))
         )
 
     def list(self, request, *args, **kwargs):

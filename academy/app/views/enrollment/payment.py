@@ -17,7 +17,7 @@ class EnrollmentPaymentViewSet(BaseViewSet):
 
     def get_queryset(self):
         return (
-            self.filter_queryset(super().get_queryset())
+            self.filter_queryset(super().get_queryset().select_related('enrollment'))
         )
 
     def create(self, request, *args, **kwargs):

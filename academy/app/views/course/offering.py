@@ -17,7 +17,7 @@ class CourseOfferingViewSet(BaseViewSet):
 
     def get_queryset(self):
         return (
-            self.filter_queryset(super().get_queryset())
+            self.filter_queryset(super().get_queryset().select_related('course', 'teacher', 'grade_level'))
         )
 
     def create(self, request, *args, **kwargs):

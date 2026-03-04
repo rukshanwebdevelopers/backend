@@ -17,7 +17,8 @@ class StudentViewSet(BaseViewSet):
 
     def get_queryset(self):
         return (
-            self.filter_queryset(super().get_queryset())
+            self.filter_queryset(
+                super().get_queryset().select_related('user', 'current_grade', 'current_academic_year'))
         )
 
     def list(self, request, *args, **kwargs):
