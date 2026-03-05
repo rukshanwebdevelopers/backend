@@ -87,6 +87,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def role_name(self) -> str:
         return ROLE(self.role).name.lower()
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
+
     def save(self, *args, **kwargs):
         self.email = self.email.lower().strip() if self.email else None
         self.mobile_number = self.mobile_number
