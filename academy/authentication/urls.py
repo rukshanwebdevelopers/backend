@@ -1,8 +1,9 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from academy.authentication.views import SignupView, SigninView, CreateAdminView, MeView, ChangePasswordEndpoint, \
-    LogoutView, InitializeAdminView
+from academy.authentication.views.common import SignupView, SigninView, CreateAdminView, MeView, LogoutView, \
+    ChangePasswordEndpoint, InitializeAdminView
+from academy.authentication.views.email import SignInAuthEndpoint
 
 urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -13,5 +14,7 @@ urlpatterns = [
     path('logout', LogoutView.as_view(), name='logout'),
     path('change-password', ChangePasswordEndpoint.as_view(), name='change-password'),
     path('init-admin/', InitializeAdminView.as_view(), name='initialize_admin'),
+
+    path("sign-in/", SignInAuthEndpoint.as_view(), name="sign-in"),
 
 ]
