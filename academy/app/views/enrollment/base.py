@@ -1,8 +1,12 @@
+# Django imports
 from django.db import IntegrityError
 from django.db.models import Q
+
+# Third party imports
 from rest_framework import status
 from rest_framework.response import Response
 
+# Module imports
 from academy.app.permissions.base import allow_permission, ROLE
 from academy.app.serializers.enrollment import EnrollmentListSerializer, EnrollmentWithPaymentMonthsSerializer, \
     EnrollmentSerializer
@@ -16,11 +20,11 @@ class EnrollmentViewSet(BaseViewSet):
     serializer_class = EnrollmentListSerializer
 
     search_fields = ["student__user__first_name", "student__user__last_name", "course_offering__grade_level__name"]
-    filterset_fields = []
+    ordering_fields = ['is_active', 'created_at']
 
     def get_queryset(self):
         return (
-            self.filter_queryset(super().get_queryset())
+            self.filter_queryset(super().get_queryset().select_related('student', 'course_offering'))
         )
 
     def list(self, request, *args, **kwargs):
@@ -110,8 +114,8 @@ class EnrollmentPendingPaymentViewSet(BaseViewSet):
     model = Enrollment
     serializer_class = EnrollmentListSerializer
 
-    search_fields = []
-    filterset_fields = []
+    search_fields = ["student__user__first_name", "student__user__last_name"]
+    ordering_fields = ['student__user__first_name', 'created_at']
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(is_active=True)

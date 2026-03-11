@@ -2,6 +2,7 @@ from django.urls import path
 
 from academy.app.views.user.admin import AdminViewSet
 from academy.app.views.user.base import UserViewSet
+from academy.app.views.user.coordinator import CoordinatorViewSet
 
 urlpatterns = [
     path(
@@ -29,5 +30,21 @@ urlpatterns = [
         "admin/list/",
         AdminViewSet.as_view({"get": "list", "post": "create"}),
         name="admin",
+    ),
+
+    path(
+        "coordinators/",
+        CoordinatorViewSet.as_view({"get": "list", "post": "create"}),
+        name="coordinator",
+    ),
+    path(
+        "coordinators/<uuid:pk>/",
+        CoordinatorViewSet.as_view({
+            "get": "retrieve",
+            "put": "update",
+            "patch": "partial_update",
+            "delete": "destroy",
+        }),
+        name="coordinator",
     ),
 ]

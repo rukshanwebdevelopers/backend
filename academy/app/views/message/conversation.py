@@ -2,24 +2,26 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from academy.app.permissions.base import allow_permission, ROLE
-from academy.app.serializers.course import CourseListSerializer, CourseSerializer
+from academy.app.serializers.message import MessageListSerializer, MessageSerializer
 from academy.app.views.base import BaseViewSet
-from academy.db.models import Course
+from academy.db.models import Message
 
 
 # Create your views here.
-class CourseViewSet(BaseViewSet):
-    model = Course
-    serializer_class = CourseListSerializer
+class ConversationMessagesViewSet(BaseViewSet):
+    model = Message
+    serializer_class = MessageListSerializer
 
-    search_fields = ["name", "slug"]
+    search_fields = []
     filterset_fields = []
-
-    lookup_field = "slug"
 
     def get_queryset(self):
         return (
-            self.filter_queryset(super().get_queryset().select_related('subject'))
+            super()
+            .get_queryset()
+            .filter(conversation_id=self.kwargs["pk"])
+            .select_related("sender")
+            .order_by("created_at")
         )
 
     def list(self, request, *args, **kwargs):
@@ -28,9 +30,9 @@ class CourseViewSet(BaseViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @allow_permission([ROLE.ADMIN])
+    @allow_permission([ROLE.ADMIN, ROLE.TEACHER])
     def create(self, request, *args, **kwargs):
-        serializer = CourseSerializer(data=request.data)
+        serializer = MessageSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             data = serializer.data

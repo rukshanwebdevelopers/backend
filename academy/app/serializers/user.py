@@ -7,7 +7,16 @@ from ...db.models import User
 class UserLiteSerializer(BaseSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'display_name', 'mobile_number', 'email', 'first_name', 'last_name']
+        fields = [
+            'id',
+            'username',
+            'display_name',
+            'mobile_number',
+            'email',
+            'first_name',
+            'last_name',
+            'full_name',
+        ]
 
 
 class UserListSerializer(serializers.ModelSerializer):

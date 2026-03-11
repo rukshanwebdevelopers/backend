@@ -7,6 +7,7 @@ from .base import BaseModel
 
 class Student(BaseModel):
     user = models.OneToOneField('db.User', on_delete=models.CASCADE)
+    exam_year = models.IntegerField()
     student_number = models.CharField(max_length=20, unique=True)
     # Current academic information
     current_grade = models.ForeignKey(
@@ -44,19 +45,27 @@ class Student(BaseModel):
 
     def save(self, *args, **kwargs):
         if not self.student_number:
-            # Auto-generate student number: YYGRADE0001
-            current_year = self.current_academic_year.start_date.year % 100
-            grade = self.current_grade.level
+            # Get last two digits of exam year (e.g., 2026 -> 26)
+            exam_year_short = str(self.exam_year)[-2:]
+
+            # Find the last student with the same exam_year to get the next sequence number
             last_student = Student.objects.filter(
-                current_grade=self.current_grade,
-                current_academic_year=self.current_academic_year
+                exam_year=self.exam_year
             ).order_by('-student_number').first()
 
-            if last_student:
-                last_number = int(last_student.student_number[-4:])
-                new_number = last_number + 1
+            if last_student and last_student.student_number:
+                # Extract the sequence number from the last student_number
+                # Assuming format like s26001, s26002, etc.
+                try:
+                    last_sequence = int(last_student.student_number[3:])  # Skip first 3 digits ('s' and year)
+                    new_sequence = last_sequence + 1
+                except (ValueError, IndexError):
+                    # If parsing fails, start from 1
+                    new_sequence = 1
             else:
-                new_number = 1
+                new_sequence = 1
 
-            self.student_number = f"{current_year}{grade:02d}{new_number:04d}"
+            # Format: 's' + YY + 3-digit sequence with leading zeros (001, 002, etc.)
+            self.student_number = f"s{exam_year_short}{new_sequence:03d}"
+
         super().save(*args, **kwargs)

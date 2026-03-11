@@ -1,3 +1,7 @@
+import random
+import string
+import time
+
 from rest_framework import serializers
 
 from academy.app.permissions.base import ROLE
@@ -17,6 +21,7 @@ class StudentListSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'student_number',
+            'exam_year',
             'date_of_birth',
             'gender',
             'is_active',
@@ -32,7 +37,7 @@ class StudentCreateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(write_only=True, required=False)
     last_name = serializers.CharField(write_only=True, required=False)
     username = serializers.CharField(write_only=True, required=False)
-    email = serializers.EmailField(write_only=True)
+    email = serializers.EmailField(write_only=True, required=False, allow_null=True, allow_blank=True)
     password = serializers.CharField(write_only=True)
     parent_guardian_phone = serializers.CharField(write_only=True)
 
@@ -48,9 +53,36 @@ class StudentCreateSerializer(serializers.ModelSerializer):
     #     return value
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        # Only validate if email is provided
+        if value and User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists.")
         return value
+
+    def generate_dummy_email(self, first_name, last_name):
+        """Generate a dummy email for students who don't provide one"""
+        # Clean names to create a base
+        base = f"{first_name or 'student'}.{last_name or 'user'}"
+        # Remove special characters and spaces
+        base = ''.join(c.lower() for c in base if c.isalnum() or c == '.')
+
+        # Add random string to ensure uniqueness
+        random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
+        # Try different combinations until we find a unique one
+        attempts = [
+            f"{base}.{random_suffix}@dummy.student",
+            f"{base}{random_suffix}@dummy.student",
+            f"student.{random_suffix}@dummy.student",
+            f"user.{random_suffix}@dummy.student",
+        ]
+
+        for email in attempts:
+            if not User.objects.filter(email=email).exists():
+                return email
+
+        # Ultimate fallback with timestamp
+        timestamp = int(time.time())
+        return f"student.{timestamp}.{random_suffix}@dummy.student"
 
     # --- CREATE ---
     def create(self, validated_data):
@@ -61,6 +93,19 @@ class StudentCreateSerializer(serializers.ModelSerializer):
         email = validated_data.pop("email")
         password = validated_data.pop("password")
 
+        # Generate username if not provided
+        # if not username:
+        #     base_username = f"{first_name.lower()}.{last_name.lower()}".replace(' ', '')
+        #     username = base_username
+        #     counter = 1
+        #     while User.objects.filter(username=username).exists():
+        #         username = f"{base_username}{counter}"
+        #         counter += 1
+
+        # Generate dummy email if not provided
+        if not email:
+            email = self.generate_dummy_email(first_name, last_name)
+
         # Create user
         user = User.objects.create(
             first_name=first_name,
@@ -68,6 +113,7 @@ class StudentCreateSerializer(serializers.ModelSerializer):
             username=username,
             email=email,
             role=ROLE.STUDENT.value,
+            is_email_verified=False,
         )
         user.set_password(password)
         user.save()
@@ -81,7 +127,7 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(write_only=True, required=False)
     last_name = serializers.CharField(write_only=True, required=False)
     username = serializers.CharField(write_only=True, required=False)
-    email = serializers.EmailField(write_only=True, required=False)
+    email = serializers.EmailField(write_only=True, required=False, allow_null=True, allow_blank=True)
     parent_guardian_phone = serializers.CharField(write_only=True)
     # password = serializers.CharField(write_only=True, required=False)
 
@@ -91,17 +137,43 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ["student_number", "user"]
 
     # --- VALIDATION ---
-    def validate_username(self, value):
-        user = self.instance.user
-        if User.objects.filter(username=value).exclude(id=user.id).exists():
-            raise serializers.ValidationError("User with this username already exists.")
-        return value
+    # def validate_username(self, value):
+    #     user = self.instance.user
+    #     if User.objects.filter(username=value).exclude(id=user.id).exists():
+    #         raise serializers.ValidationError("User with this username already exists.")
+    #     return value
 
     def validate_email(self, value):
         user = self.instance.user
         if User.objects.filter(email=value).exclude(id=user.id).exists():
             raise serializers.ValidationError("User with this email already exists.")
         return value
+
+    def generate_dummy_email(self, first_name, last_name):
+        """Generate a dummy email for students who don't provide one"""
+        # Clean names to create a base
+        base = f"{first_name or 'student'}.{last_name or 'user'}"
+        # Remove special characters and spaces
+        base = ''.join(c.lower() for c in base if c.isalnum() or c == '.')
+
+        # Add random string to ensure uniqueness
+        random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
+        # Try different combinations until we find a unique one
+        attempts = [
+            f"{base}.{random_suffix}@dummy.student",
+            f"{base}{random_suffix}@dummy.student",
+            f"student.{random_suffix}@dummy.student",
+            f"user.{random_suffix}@dummy.student",
+        ]
+
+        for email in attempts:
+            if not User.objects.filter(email=email).exists():
+                return email
+
+        # Ultimate fallback with timestamp
+        timestamp = int(time.time())
+        return f"student.{timestamp}.{random_suffix}@dummy.student"
 
     # --- UPDATE ---
     def update(self, instance, validated_data):
@@ -119,6 +191,10 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
         username = validated_data.pop("username", None)
         email = validated_data.pop("email", None)
         # password = validated_data.pop("password", None)
+
+        # Generate dummy email if not provided
+        if not email:
+            email = self.generate_dummy_email(first_name, last_name)
 
         # Update User fields
         if first_name:

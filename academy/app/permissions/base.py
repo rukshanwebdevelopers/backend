@@ -9,6 +9,7 @@ from rest_framework.response import Response
 class ROLE(Enum):
     ADMIN = 20
     TEACHER = 15
+    COORDINATOR = 12
     STUDENT = 10
     GUEST = 5
 
@@ -16,6 +17,7 @@ class ROLE(Enum):
 ROLE_PERMISSIONS = {
     ROLE.ADMIN: ["super_admin"],
     ROLE.TEACHER: ["teacher"],
+    ROLE.COORDINATOR: ["coordinator"],
     ROLE.STUDENT: ["student"],
     ROLE.GUEST: ["guest"],
 }

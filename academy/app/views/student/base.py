@@ -1,6 +1,8 @@
+# Third party imports
 from rest_framework import status
 from rest_framework.response import Response
 
+# Module imports
 from academy.app.permissions.base import allow_permission, ROLE
 from academy.app.serializers.course import CourseOfferingListSerializer
 from academy.app.serializers.enrollment import EnrollmentListSerializer
@@ -14,15 +16,19 @@ class StudentViewSet(BaseViewSet):
     serializer_class = StudentListSerializer
 
     search_fields = ['user__email', 'user__first_name', 'user__last_name']
+    ordering_fields = ['user__first_name', 'created_at']
 
     def get_queryset(self):
         return (
-            self.filter_queryset(super().get_queryset())
+            self.filter_queryset(
+                super().get_queryset().select_related('user', 'current_grade', 'current_academic_year'))
         )
 
+    @allow_permission([ROLE.ADMIN, ROLE.COORDINATOR])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @allow_permission([ROLE.ADMIN, ROLE.COORDINATOR])
     def create(self, request, *args, **kwargs):
         serializer = StudentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -32,6 +38,7 @@ class StudentViewSet(BaseViewSet):
         output = StudentListSerializer(student, context={"request": request}).data
         return Response(output, status=status.HTTP_201_CREATED)
 
+    @allow_permission([ROLE.ADMIN, ROLE.COORDINATOR])
     def update(self, request, *args, **kwargs):
         student = Student.objects.get(pk=kwargs["pk"])
 
@@ -46,7 +53,7 @@ class StudentViewSet(BaseViewSet):
         output = StudentListSerializer(student, context={"request": request}).data
         return Response(output, status=status.HTTP_200_OK)
 
-    @allow_permission([ROLE.ADMIN])
+    @allow_permission([ROLE.ADMIN, ROLE.COORDINATOR])
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 

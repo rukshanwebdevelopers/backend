@@ -1,8 +1,11 @@
-# Create your views here.
+# Django imports
 from django.db import IntegrityError
+
+# Third party imports
 from rest_framework import status
 from rest_framework.response import Response
 
+# Module imports
 from academy.app.serializers.course import CourseOfferingListSerializer, CourseOfferingSerializer
 from academy.app.views.base import BaseViewSet
 from academy.db.models import CourseOffering
@@ -13,11 +16,11 @@ class CourseOfferingViewSet(BaseViewSet):
     serializer_class = CourseOfferingListSerializer
 
     search_fields = ["year", "grade_level__name"]
-    filterset_fields = []
+    ordering_fields = ['course__name', 'created_at']
 
     def get_queryset(self):
         return (
-            self.filter_queryset(super().get_queryset())
+            self.filter_queryset(super().get_queryset().select_related('course', 'teacher', 'grade_level'))
         )
 
     def create(self, request, *args, **kwargs):

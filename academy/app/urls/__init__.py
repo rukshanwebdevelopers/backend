@@ -1,8 +1,10 @@
 from .academic_year import urlpatterns as academic_year_urls
 from .analytic import urlpatterns as analytic_urls
+from .conversation import urlpatterns as conversation_urls
 from .course import urlpatterns as course_urls
 from .enrollment import urlpatterns as enrollment_urls
 from .grade_level import urlpatterns as grade_level_urls
+from .message import urlpatterns as message_urls
 from .report import urlpatterns as reports_urls
 from .settings import urlpatterns as settings_urls
 from .student import urlpatterns as student_urls
@@ -22,4 +24,6 @@ urlpatterns = [
     *subject_urls,
     *teacher_urls,
     *user_urls,
+    *conversation_urls,
+    *message_urls,
 ]

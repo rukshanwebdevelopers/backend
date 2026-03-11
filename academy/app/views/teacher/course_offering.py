@@ -24,6 +24,7 @@ class TeacherCourseOfferingViewSet(BaseViewSet):
         return self.filter_queryset(
             super()
             .get_queryset()
+            .select_related('course', 'teacher', 'grade_level')
             .filter(teacher=teacher)
         )
 

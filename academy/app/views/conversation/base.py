@@ -1,25 +1,33 @@
+from crum import get_current_user
 from rest_framework import status
 from rest_framework.response import Response
 
 from academy.app.permissions.base import allow_permission, ROLE
-from academy.app.serializers.course import CourseListSerializer, CourseSerializer
+from academy.app.serializers.conversation import ConversationListSerializer, ConversationSerializer
 from academy.app.views.base import BaseViewSet
-from academy.db.models import Course
+from academy.db.models import Conversation
 
 
 # Create your views here.
-class CourseViewSet(BaseViewSet):
-    model = Course
-    serializer_class = CourseListSerializer
+class ConversationViewSet(BaseViewSet):
+    model = Conversation
+    serializer_class = ConversationListSerializer
 
-    search_fields = ["name", "slug"]
+    search_fields = []
     filterset_fields = []
 
-    lookup_field = "slug"
-
     def get_queryset(self):
+        current_user = get_current_user()
+
         return (
-            self.filter_queryset(super().get_queryset().select_related('subject'))
+            self.filter_queryset(
+                super()
+                .get_queryset()
+                .filter(participants__user=current_user)
+                # .select_related("latest_message")
+                .prefetch_related("participants__user")
+                .distinct()
+            )
         )
 
     def list(self, request, *args, **kwargs):
@@ -30,7 +38,7 @@ class CourseViewSet(BaseViewSet):
 
     @allow_permission([ROLE.ADMIN])
     def create(self, request, *args, **kwargs):
-        serializer = CourseSerializer(data=request.data)
+        serializer = ConversationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             data = serializer.data
