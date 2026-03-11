@@ -21,6 +21,7 @@ class StudentListSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'student_number',
+            'exam_year',
             'date_of_birth',
             'gender',
             'is_active',
