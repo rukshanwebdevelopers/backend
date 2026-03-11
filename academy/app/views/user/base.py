@@ -1,6 +1,8 @@
+# Third party imports
 from rest_framework import status
 from rest_framework.response import Response
 
+# Module imports
 from academy.app.permissions.base import allow_permission, ROLE
 from academy.app.serializers.user import UserListSerializer
 from academy.app.views.base import BaseViewSet
@@ -12,6 +14,7 @@ class UserViewSet(BaseViewSet):
     serializer_class = UserListSerializer
 
     search_fields = ["username", "email"]
+    ordering_fields = ['first_name', 'is_active', 'created_at']
 
     def get_queryset(self):
         return (

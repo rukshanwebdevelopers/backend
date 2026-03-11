@@ -1,6 +1,8 @@
+# Third party imports
 from rest_framework import status
 from rest_framework.response import Response
 
+# Module imports
 from academy.app.permissions.base import ROLE
 from academy.app.serializers.coodinator import CoordinatorSerializer, CoordinatorListSerializer
 from academy.app.views.base import BaseViewSet
@@ -12,6 +14,7 @@ class CoordinatorViewSet(BaseViewSet):
     serializer_class = CoordinatorListSerializer
 
     search_fields = ["username", "email"]
+    ordering_fields = ['first_name', 'created_at']
 
     def get_queryset(self):
         return (

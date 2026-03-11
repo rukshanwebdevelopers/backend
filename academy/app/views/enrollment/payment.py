@@ -1,6 +1,10 @@
+# Django imports
 from django.db import transaction
+
+# Third party imports
 from rest_framework.response import Response
 
+# Module imports
 from academy.app.serializers.enrollment import EnrollmentPaymentListSerializer, EnrollmentPaymentCreateSerializer
 from academy.app.views.base import BaseViewSet
 from academy.db.models import EnrollmentPayment
@@ -12,8 +16,8 @@ class EnrollmentPaymentViewSet(BaseViewSet):
     model = EnrollmentPayment
     serializer_class = EnrollmentPaymentListSerializer
 
-    search_fields = []
-    filterset_fields = []
+    search_fields = ["enrollment__student__user__first_name", "enrollment__student__user__last_name"]
+    ordering_fields = ['enrollment__student__user__first_name', 'created_at']
 
     def get_queryset(self):
         return (
