@@ -63,11 +63,7 @@ class VideoDetailAPIEndpoint(BaseAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, pk):
-        """Update course content
-
-        Partially update an existing course content's properties like name, description, or settings.
-        Tracks changes in model activity logs for audit purposes.
-        """
+        """Update video"""
         try:
             video = Video.objects.get(pk=pk)
 
@@ -91,3 +87,9 @@ class VideoDetailAPIEndpoint(BaseAPIView):
                     {"name": "The project name is already taken"},
                     status=status.HTTP_409_CONFLICT,
                 )
+
+    def delete(self, request, pk):
+        """Delete video"""
+        video = Video.objects.filter(pk=pk)
+        video.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
