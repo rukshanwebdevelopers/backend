@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
-from rest_framework import status
+from django.core.exceptions import ValidationError
+from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
@@ -9,7 +10,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from academy.app.permissions.base import ROLE
 from academy.app.permissions.permissions import IsAdminOrReadOnly
-from academy.app.serializers.authentication import SignupSerializer, SigninSerializer, ChangePasswordSerializer
+from academy.app.serializers.authentication import SignupSerializer, SigninSerializer, ChangePasswordSerializer, \
+    ChangeEmailSerializer
 from academy.app.serializers.user import UserLiteSerializer
 from academy.app.views.base import BaseAPIView
 from academy.db.models import User
@@ -111,6 +113,29 @@ class ChangePasswordEndpoint(BaseAPIView):
         new_password = serializer.validated_data['new_password']
 
         user.set_password(new_password)
+        user.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+
+class ChangeEmailEndpoint(BaseAPIView):
+    def post(self, request):
+        serializer = ChangeEmailSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        new_email = serializer.validated_data['email']
+
+        if user.email != new_email:
+            if User.objects.filter(email=new_email).exists():
+                raise serializers.ValidationError({
+                    "email": "A user with this email already exists."
+                })
+
+        user.email = new_email
         user.save()
 
         return Response(status=status.HTTP_200_OK)
