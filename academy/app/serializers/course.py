@@ -61,5 +61,9 @@ class CourseOfferingLiteSerializer(BaseSerializer):
         model = CourseOffering
         fields = [
             'id',
+            'fee',
+            'year',
+            'batch',
+
             'course',
         ]
