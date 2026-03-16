@@ -1,6 +1,7 @@
 from django.urls import path
 
 from academy.app.views.course.base import CourseViewSet
+from academy.app.views.course.content import CourseContentListCreateAPIEndpoint, CourseContentDetailAPIEndpoint
 from academy.app.views.course.offering import CourseOfferingViewSet
 
 urlpatterns = [
@@ -33,5 +34,20 @@ urlpatterns = [
             "delete": "destroy",
         }),
         name="course-offering",
+    ),
+
+    path(
+        "course-contents/",
+        CourseContentListCreateAPIEndpoint.as_view({"get": "list", "post": "create"}),
+        name="course-content",
+    ),
+    path(
+        "course-contents/<uuid:pk>/",
+        CourseContentDetailAPIEndpoint.as_view(http_method_names=[
+            "get",
+            "patch",
+            "delete"
+        ]),
+        name="course-content",
     ),
 ]
