@@ -1,10 +1,10 @@
 # Django imports
 from django.db import IntegrityError
-
 # Third party imports
 from rest_framework import status
 from rest_framework.response import Response
 
+from academy.app.permissions.base import allow_permission, ROLE
 # Module imports
 from academy.app.serializers.course import CourseOfferingListSerializer, CourseOfferingSerializer
 from academy.app.views.base import BaseViewSet
@@ -16,7 +16,7 @@ class CourseOfferingViewSet(BaseViewSet):
     serializer_class = CourseOfferingListSerializer
 
     search_fields = ["year", "grade_level__name"]
-    ordering_fields = ['course__name', 'created_at']
+    ordering_fields = ['course__name', 'batch', 'year', 'created_at']
 
     def get_queryset(self):
         return (
@@ -53,13 +53,29 @@ class CourseOfferingViewSet(BaseViewSet):
                     status=status.HTTP_409_CONFLICT,
                 )
 
+    @allow_permission([ROLE.ADMIN])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @allow_permission([ROLE.ADMIN])
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    @allow_permission([ROLE.ADMIN])
     def update(self, request, *args, **kwargs):
+        course_offering = CourseOffering.objects.filter(
+            course=request.data.get("course"),
+            grade_level=request.data.get("grade_level"),
+            year=request.data.get("year"),
+            batch=request.data.get("batch"),
+        ).first()
+
+        if course_offering:
+            return Response(
+                {"batch": "Course Offering already exists."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
         course_offering = CourseOffering.objects.get(pk=kwargs["pk"])
 
         serializer = CourseOfferingSerializer(
@@ -73,8 +89,10 @@ class CourseOfferingViewSet(BaseViewSet):
         output = CourseOfferingListSerializer(course_offering, context={"request": request}).data
         return Response(output, status=status.HTTP_200_OK)
 
+    @allow_permission([ROLE.ADMIN])
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
+    @allow_permission([ROLE.ADMIN])
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)

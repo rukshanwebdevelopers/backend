@@ -1,10 +1,10 @@
-# Create your views here.
-
+from academy.app.permissions.base import allow_permission, ROLE
 from academy.app.serializers.course import CourseOfferingListSerializer
 from academy.app.views.base import BaseViewSet
 from academy.db.models import CourseOffering
 
 
+# Create your views here.
 class TeacherCourseOfferingViewSet(BaseViewSet):
     model = CourseOffering
     serializer_class = CourseOfferingListSerializer
@@ -28,8 +28,10 @@ class TeacherCourseOfferingViewSet(BaseViewSet):
             .filter(teacher=teacher)
         )
 
+    @allow_permission([ROLE.ADMIN])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @allow_permission([ROLE.ADMIN])
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)

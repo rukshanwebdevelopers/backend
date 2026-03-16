@@ -22,9 +22,11 @@ class CourseViewSet(BaseViewSet):
             self.filter_queryset(super().get_queryset().select_related('subject'))
         )
 
+    @allow_permission([ROLE.ADMIN])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @allow_permission([ROLE.ADMIN])
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 

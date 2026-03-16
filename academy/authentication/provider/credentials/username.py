@@ -1,6 +1,7 @@
 from rest_framework.exceptions import ValidationError
 
 from academy.authentication.adapter.credential import CredentialAdapter
+from academy.authentication.views.common import get_tokens_for_user
 from academy.db.models import User
 
 
@@ -17,7 +18,7 @@ class UsernameProvider(CredentialAdapter):
         if self.is_signup:
             ...
         else:
-            user = User.objects.filter(email=self.key).first()
+            user = User.objects.filter(username=self.key).first()
 
             if not user:
                 # Todo -> refactor error message
@@ -33,7 +34,7 @@ class UsernameProvider(CredentialAdapter):
 
             super().set_user_data(
                 {
-                    "email": self.key,
+                    "username": self.key,
                     "user": {
                         "first_name": "",
                         "last_name": "",
@@ -43,3 +44,6 @@ class UsernameProvider(CredentialAdapter):
                 }
             )
             return
+
+    def get_user_token(self, data, headers=None):
+        return get_tokens_for_user(data)
