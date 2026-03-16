@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from academy.app.serializers.teacher import TeacherListSerializer, TeacherCreateSerializer, TeacherUpdateSerializer
 from academy.app.views.base import BaseViewSet
 from academy.db.models import Teacher
+from academy.app.permissions.base import allow_permission, ROLE
 
 
 class TeacherViewSet(BaseViewSet):
@@ -20,9 +21,11 @@ class TeacherViewSet(BaseViewSet):
             self.filter_queryset(super().get_queryset().select_related('user'))
         )
 
+    @allow_permission([ROLE.ADMIN])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @allow_permission([ROLE.ADMIN])
     def create(self, request, *args, **kwargs):
         serializer = TeacherCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -32,6 +35,7 @@ class TeacherViewSet(BaseViewSet):
         output = TeacherListSerializer(teacher, context={"request": request}).data
         return Response(output, status=status.HTTP_201_CREATED)
 
+    @allow_permission([ROLE.ADMIN])
     def update(self, request, *args, **kwargs):
         teacher = Teacher.objects.get(pk=kwargs["pk"])
 

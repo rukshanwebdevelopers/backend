@@ -21,6 +21,7 @@ class UserViewSet(BaseViewSet):
             self.filter_queryset(super().get_queryset())
         )
 
+    @allow_permission([ROLE.ADMIN])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 

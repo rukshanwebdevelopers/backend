@@ -59,6 +59,7 @@ class StudentViewSet(BaseViewSet):
 
 
 class StudentEnrolledCoursesEndpoint(BaseAPIView):
+    @allow_permission([ROLE.ADMIN])
     def get(self, request, pk):
         student = Student.objects.get(pk=pk)
 
@@ -70,6 +71,7 @@ class StudentEnrolledCoursesEndpoint(BaseAPIView):
 
 
 class StudentMeEnrollmentsEndpoint(BaseAPIView):
+    @allow_permission([ROLE.ADMIN])
     def get(self, request):
         user = request.user
 
@@ -83,6 +85,7 @@ class StudentMeEnrollmentsEndpoint(BaseAPIView):
 
 
 class StudentEnrollmentsEndpoint(BaseAPIView):
+    @allow_permission([ROLE.ADMIN])
     def get(self, request, pk):
         enrollments = Enrollment.objects.filter(student_id=pk)
 
