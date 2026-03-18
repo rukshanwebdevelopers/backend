@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from academy.app.serializers.base import BaseSerializer
 from academy.app.serializers.course import CourseOfferingListSerializer
-from academy.app.serializers.student import StudentListSerializer
+from academy.app.serializers.student import StudentListSerializer, StudentLiteSerializer
 from academy.db.models import Enrollment, EnrollmentPayment
 from academy.db.models.enrollment import EnrollmentStatusType
 
@@ -49,6 +49,22 @@ class EnrollmentListSerializer(BaseSerializer):
             'is_active',
             'student',
             'course_offering',
+        ]
+
+
+class CourseOfferingEnrollmentListSerializer(BaseSerializer):
+    student = StudentLiteSerializer()
+
+    class Meta:
+        model = Enrollment
+        fields = [
+            'id',
+            'status',
+            'last_payment_month',
+            'last_payment_year',
+            'is_active',
+
+            'student'
         ]
 
 
