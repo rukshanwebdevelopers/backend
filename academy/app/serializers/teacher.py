@@ -62,7 +62,7 @@ class TeacherCreateSerializer(serializers.ModelSerializer):
             user.save()
 
             notification = Notification.objects.create(
-                title="Welcome to Beyond Health",
+                title="Welcome to RK Academy",
                 message=f"We're so glad you're here!",
                 type="USER_WELCOME",
                 priority="low",
