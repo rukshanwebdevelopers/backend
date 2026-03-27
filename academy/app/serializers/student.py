@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from academy.app.permissions.base import ROLE
 from academy.app.serializers.academic_year import AcademicYearListSerializer
+from academy.app.serializers.base import BaseSerializer
 from academy.app.serializers.grade_level import GradeLevelListSerializer
 from academy.app.serializers.user import UserLiteSerializer
 from academy.db.models import Student, User
@@ -129,6 +130,7 @@ class StudentUpdateSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True, required=False)
     email = serializers.EmailField(write_only=True, required=False, allow_null=True, allow_blank=True)
     parent_guardian_phone = serializers.CharField(write_only=True)
+
     # password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
@@ -240,4 +242,22 @@ class StudentLiteSerializer(serializers.ModelSerializer):
             'current_academic_year',
             'parent_guardian_name',
             'parent_guardian_phone'
+        ]
+
+
+class StudentSimpleSerializer(BaseSerializer):
+    user = UserLiteSerializer()
+    full_name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Student
+        fields = [
+            'id',
+            'student_number',
+            'date_of_birth',
+            'gender',
+            'is_active',
+
+            'user',
+            'full_name',
         ]
