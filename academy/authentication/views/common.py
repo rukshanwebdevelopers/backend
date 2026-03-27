@@ -54,7 +54,7 @@ class SigninView(APIView):
     permission_classes = []
 
     def post(self, request):
-        logger.info("signin_started", requested_by=request.user.id)
+        logger.info("signin_started")
 
         serializer = SigninSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -77,7 +77,7 @@ class SigninView(APIView):
             'role': user.role_name,
         }
 
-        logger.info("signin_completed", requested_by=request.user.id)
+        logger.info("signin_completed", requested_by=user.id)
         return Response(output, status=status.HTTP_200_OK)
 
 
