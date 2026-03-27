@@ -1,4 +1,5 @@
 # Third party imports
+import structlog
 from django.db.models import Q
 
 # Module imports
@@ -7,6 +8,8 @@ from academy.app.serializers.course_content import VideoListSerializer
 from academy.app.serializers.enrollment import EnrollmentListSerializer
 from academy.app.views.base import BaseViewSet
 from academy.db.models import Enrollment, Student, Video
+
+logger = structlog.getLogger(__name__)
 
 
 class StudentMeEnrollmentViewSet(BaseViewSet):
@@ -20,17 +23,21 @@ class StudentMeEnrollmentViewSet(BaseViewSet):
         user = self.request.user
         student = Student.objects.get(user=user)
 
-        return (
+        queryset = (
             self.filter_queryset(
                 super().get_queryset()).filter(student=student)
         )
+        logger.info("student_queryset_loaded", user_id=self.request.user.id, role=self.request.user.role)
+        return queryset
 
     @allow_permission([ROLE.STUDENT])
     def list(self, request, *args, **kwargs):
+        logger.info("student_me_enrollment_list_requested", requested_by=request.user.id, role=request.user.role)
         return super().list(request, *args, **kwargs)
 
     @allow_permission([ROLE.STUDENT])
     def retrieve(self, request, *args, **kwargs):
+        logger.info("student_me_enrollment_requested", requested_by=request.user.id, role=request.user.role)
         return super().retrieve(request, *args, **kwargs)
 
 
@@ -38,7 +45,7 @@ class StudentMeEnrollmentVideosViewSet(BaseViewSet):
     model = Video
     serializer_class = VideoListSerializer
 
-    search_fields = []
+    search_fields = ['title']
     ordering_fields = []
 
     def get_queryset(self):
@@ -64,4 +71,5 @@ class StudentMeEnrollmentVideosViewSet(BaseViewSet):
 
     @allow_permission([ROLE.STUDENT])
     def list(self, request, *args, **kwargs):
+        logger.info("student_me_enrollment_video_list_requested", requested_by=request.user.id, role=request.user.role)
         return super().list(request, *args, **kwargs)

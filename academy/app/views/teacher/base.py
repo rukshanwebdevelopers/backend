@@ -1,12 +1,15 @@
 # Third party imports
+import structlog
 from rest_framework import status
 from rest_framework.response import Response
 
 # Module imports
+from academy.app.permissions.base import allow_permission, ROLE
 from academy.app.serializers.teacher import TeacherListSerializer, TeacherCreateSerializer, TeacherUpdateSerializer
 from academy.app.views.base import BaseViewSet
 from academy.db.models import Teacher
-from academy.app.permissions.base import allow_permission, ROLE
+
+logger = structlog.getLogger(__name__)
 
 
 class TeacherViewSet(BaseViewSet):
@@ -27,18 +30,21 @@ class TeacherViewSet(BaseViewSet):
 
     @allow_permission([ROLE.ADMIN])
     def create(self, request, *args, **kwargs):
+        logger.info("teacher_create_started", requested_by=request.user.id)
+
         serializer = TeacherCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         teacher = serializer.save()
 
-        output = TeacherListSerializer(teacher, context={"request": request}).data
-        return Response(output, status=status.HTTP_201_CREATED)
+        logger.info("teacher_created", teacher_id=teacher.id, created_by=request.user.id)
+        return Response(TeacherListSerializer(teacher).data, status=status.HTTP_201_CREATED)
 
     @allow_permission([ROLE.ADMIN])
     def update(self, request, *args, **kwargs):
-        teacher = Teacher.objects.get(pk=kwargs["pk"])
+        logger.info("teacher_update_started", teacher_id=self.kwargs.get('pk'), requested_by=request.user.id)
 
+        teacher = Teacher.objects.get(pk=kwargs["pk"])
         serializer = TeacherUpdateSerializer(
             teacher,
             data=request.data,
@@ -47,5 +53,5 @@ class TeacherViewSet(BaseViewSet):
         serializer.is_valid(raise_exception=True)
         teacher = serializer.save()
 
-        output = TeacherListSerializer(teacher, context={"request": request}).data
-        return Response(output, status=status.HTTP_200_OK)
+        logger.info("teacher_updated", teacher_id=teacher.id, created_by=request.user.id)
+        return Response(TeacherListSerializer(teacher).data, status=status.HTTP_200_OK)
