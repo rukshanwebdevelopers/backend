@@ -55,6 +55,7 @@ class CourseOfferingSerializer(BaseSerializer):
 
 
 class CourseOfferingLiteSerializer(BaseSerializer):
+    grade_level = GradeLevelListSerializer()
     course = CourseListSerializer()
 
     class Meta:
@@ -65,5 +66,6 @@ class CourseOfferingLiteSerializer(BaseSerializer):
             'year',
             'batch',
 
+            'grade_level',
             'course',
         ]
