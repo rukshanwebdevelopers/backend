@@ -76,6 +76,12 @@ LOGGING = {
             "propagate": False,
         },
 
+        "academy.authentication": {
+            "handlers": ["console", "json_file", "flat_line_file"] if DEBUG else ["json_file", "flat_line_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+
         "academy.exception": {
             "handlers": ["console", "error_file"] if DEBUG else ["error_file"],
             "level": "WARNING",
