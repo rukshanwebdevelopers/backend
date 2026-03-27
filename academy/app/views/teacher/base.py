@@ -20,12 +20,15 @@ class TeacherViewSet(BaseViewSet):
     ordering_fields = ['user__first_name', 'is_active', 'created_at']
 
     def get_queryset(self):
-        return (
+        queryset = (
             self.filter_queryset(super().get_queryset().select_related('user'))
         )
+        logger.info("course_queryset_loaded", user_id=self.request.user.id, role=self.request.user.role)
+        return queryset
 
     @allow_permission([ROLE.ADMIN])
     def list(self, request, *args, **kwargs):
+        logger.info("teacher_list_requested", requested_by=request.user.id, role=request.user.role)
         return super().list(request, *args, **kwargs)
 
     @allow_permission([ROLE.ADMIN])
