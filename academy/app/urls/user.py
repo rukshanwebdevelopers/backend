@@ -1,6 +1,6 @@
 from django.urls import path
 
-from academy.app.views.user.admin import AdminViewSet
+from academy.app.views.user.admin import AdminViewSet, ResetTeacherPasswordEndpoint
 from academy.app.views.user.base import UserViewSet
 from academy.app.views.user.coordinator import CoordinatorViewSet
 
@@ -30,6 +30,11 @@ urlpatterns = [
         "admin/list/",
         AdminViewSet.as_view({"get": "list", "post": "create"}),
         name="admin",
+    ),
+    path(
+        "admin/teacher/<uuid:teacher_id>/reset-password",
+        ResetTeacherPasswordEndpoint.as_view(),
+        name="reset-teacher-password",
     ),
 
     path(
