@@ -90,15 +90,11 @@ class EnrollmentViewSet(BaseViewSet):
 
         serializer = EnrollmentSerializer(data=request.data)
 
-        if serializer.is_valid(raise_exception=True):
-            enrollment = serializer.save()
-            return Response(EnrollmentListSerializer(enrollment).data, status=status.HTTP_201_CREATED)
+        serializer.is_valid(raise_exception=True)
+        enrollment = serializer.save()
 
         logger.info("enrollment_created", enrollment_id=enrollment.id, created_by=request.user.id)
-        return Response(
-            [serializer.errors[error][0] for error in serializer.errors],
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        return Response(EnrollmentListSerializer(enrollment).data, status=status.HTTP_201_CREATED)
 
     @allow_permission([ROLE.ADMIN])
     def update(self, request, *args, **kwargs):
